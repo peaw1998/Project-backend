@@ -1,8 +1,8 @@
-const LearnerUser = require("./LearnerUser")
-const TeacherUser = require("./TeacherUser")
-const Subject = require("./Subject")
-const Chapter = require("./Chapter")
-const Exercise = require("./Exercise")
+const LearnerUser = require("./model/LearnerUser")
+const TeacherUser = require("./model/TeacherUser")
+const Subject = require("./model/Subject")
+const Chapter = require("./model/Chapter")
+const Exercise = require("./model/Exercise")
 const mongoose = require("mongoose")
 const _ = require("lodash")
 
@@ -25,7 +25,7 @@ LearnerUser.create({
     email: 'peaw123@peaw.com',
     subjectID: [p24('1')],
 }, function (err, small) {
-    if (err) return handleError(err);
+    if (err) return err;
 });
 
 Subject.create({
