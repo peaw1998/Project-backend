@@ -10,16 +10,14 @@ const p24 = (n) => _.padStart(n, 24, '0')
 
 TeacherUser.create({
     _id: p24('1'),
-    teacherID: p24('t1'),
-    username: 'teacher1',
+    username: 'teacher2',
     password: '12345',
-    email: 'teacher1@company.com',
+    email: 'teacher2@company.com',
     subjectID: [p24('1')]
 })
 
 LearnerUser.create({
     _id: p24(1),
-    learnerID: p24('l1'),
     username: 'pimwipa',
     password: '12345',
     email: 'peaw123@peaw.com',
@@ -30,8 +28,7 @@ LearnerUser.create({
 
 Subject.create({
     _id: p24('1'),
-    subjectID: p24('s1'),
-    chapterID: [p24('1')],
+    chapterID: [p24('1'),p24('2')],
     subjectName: 'subject1',
     exerciseID: [p24('1')]
 
@@ -39,14 +36,18 @@ Subject.create({
 
 Chapter.create({
     _id: p24('1'),
-    chapterID: p24('c1'),
-    chapterName: String,
-    content: String,
+    chapterName: "chapter1",
+    content: "content",
+})
+
+Chapter.create({
+    _id: p24('2'),
+    chapterName: "chapter2",
+    content: "content",
 })
 
 Exercise.create({
     _id: p24('1'),
-    exerciseID: p24('e1'),
     type: 'choice',
     preTest: true,
     postTest: false,

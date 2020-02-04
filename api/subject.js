@@ -1,5 +1,7 @@
 const router = require("express").Router()
 const Subject = require("../model/Subject")
+const TeacherUser = require("../model/TeacherUser")
+const LearnerUser = require("../model/LearnerUser")
 
 //Subject
 router.get("/api/subjects", (req, res) => {
@@ -48,9 +50,21 @@ router.put("/api/subject/:id", (req, res) => {
 })
 
 router.delete("/api/subject/:id", (req, res) => {
-      Subject.findOneAndDelete({ _id: req.params.id }, function(err, user) {
-            if (user) {
-                  res.send("delete success")
+      Subject.findOneAndDelete({ _id: req.params.id }, function(err, result) {
+            if (result) {
+                  TeacherUser.where({ subjectID: req.params.id }).updateMany({ $pull: { subjectID: req.params.id } }, function(err, result1) {
+                        if(err) {
+                              res.sendStatus(400).send("delete error")
+                        } else {
+                              LearnerUser.where({ subjectID: req.params.id }).updateMany({ $pull: { subjectID: req.params.id } }, function(err, result2) {
+                                    if(err) {
+                                          res.sendStatus(400).send("delete error")
+                                    } else {
+                                          res.send(result2)
+                                    }
+                              })
+                        }
+                  })
             } else {
                   res.status(400).send("delete error")
             }
