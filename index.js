@@ -16,7 +16,7 @@ db.once("open", function callback() {
 })
 
 app.use(express.json())
-require('./Mockup')
+// require('./Mockup')
 app.get("/", (req, res) => {
       res.send("test")
 })
