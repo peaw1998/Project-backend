@@ -37,17 +37,17 @@ const JwtStrategy = require("passport-jwt").Strategy;
 const SECRET = "MY_SECRET_KEY";
 //สร้าง Strategy
 const jwtOptions = {
-   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-   secretOrKey: SECRET
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: SECRET
 };
 const jwtAuth = new JwtStrategy(jwtOptions, (payload, done) => {
-   done(null, true);
+      done(null, true);
 });
 //เสียบ Strategy เข้า Passport
 passport.use(jwtAuth);
 //ทำ Passport Middleware
-const requireJWTAuth = passport.authenticate("jwt",{session:false});
-app.use("/",requireJWTAuth)
+const requireJWTAuth = passport.authenticate("jwt", { session: false });
+app.use("/", requireJWTAuth)
 app.use(require("./api/subject"))
 app.use(require("./api/chapter"))
 app.use(require("./api/exercise"))

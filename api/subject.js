@@ -5,13 +5,13 @@ const LearnerUser = require("../model/LearnerUser")
 
 //Subject
 router.get("/api/subjects", (req, res) => {
-      Subject.find({}, function(err, users) {
+      Subject.find({}, function (err, users) {
             res.send({ users: users })
       })
 })
 
 router.get("/api/subject/:id", (req, res) => {
-      Subject.findOne({ _id: req.params.id }, function(err, user) {
+      Subject.findOne({ _id: req.params.id }).populate('chapterID').exec(function (err, user) {
             if (user) {
                   res.send(user)
             } else {
@@ -36,7 +36,7 @@ router.put("/api/subject/:id", (req, res) => {
             Subject.findOneAndUpdate(
                   { _id: req.params.id },
                   { subjectName: req.body.name },
-                  function(err, user) {
+                  function (err, user) {
                         if (user) {
                               res.send("update success")
                         } else {
@@ -50,14 +50,14 @@ router.put("/api/subject/:id", (req, res) => {
 })
 
 router.delete("/api/subject/:id", (req, res) => {
-      Subject.findOneAndDelete({ _id: req.params.id }, function(err, result) {
+      Subject.findOneAndDelete({ _id: req.params.id }, function (err, result) {
             if (result) {
-                  TeacherUser.where({ subjectID: req.params.id }).updateMany({ $pull: { subjectID: req.params.id } }, function(err, result1) {
-                        if(err) {
+                  TeacherUser.where({ subjectID: req.params.id }).updateMany({ $pull: { subjectID: req.params.id } }, function (err, result1) {
+                        if (err) {
                               res.sendStatus(400).send("delete error")
                         } else {
-                              LearnerUser.where({ subjectID: req.params.id }).updateMany({ $pull: { subjectID: req.params.id } }, function(err, result2) {
-                                    if(err) {
+                              LearnerUser.where({ subjectID: req.params.id }).updateMany({ $pull: { subjectID: req.params.id } }, function (err, result2) {
+                                    if (err) {
                                           res.sendStatus(400).send("delete error")
                                     } else {
                                           res.send(result2)
