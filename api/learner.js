@@ -2,6 +2,9 @@ const router = require("express").Router()
 const LearnerUser = require("../model/LearnerUser")
 const bcrypt = require("bcrypt")
 const jwt = require("jwt-simple")
+const nodemailer = require("nodemailer")
+const mail = require("../config/gmail")
+const crypto = require("crypto")
 
 //Learner
 router.get("/api/learners", (req, res) => {
@@ -20,7 +23,7 @@ router.get("/api/learner/:id", (req, res) => {
       })
 })
 
-router.get("/auth/learner/login", (req, res) => {
+router.post("/auth/learner/login", (req, res) => {
       LearnerUser.findOne({ username: req.body.username }, function(err, user) {
             if (user) {
                   bcrypt.compare(req.body.password, user.password, function(
@@ -68,6 +71,42 @@ router.post("/auth/learner/signup", (req, res) => {
                   })
             } else {
                   res.status(400).send("duplicate username or password")
+            }
+      })
+})
+
+router.post("/auth/learner/forgetpassword", (req, res) => {
+      LearnerUser.findOne({ email: req.body.email }, function(err, result) {
+            if (result) {
+                  let newPassword = crypto.randomBytes(8).toString("hex")
+                  const transporter = nodemailer.createTransport({
+                        service: "gmail",
+                        auth: mail
+                  })
+
+                  let mailOptions = {
+                        from: mail.user, // sender
+                        to: req.body.email, // list of receivers
+                        subject: "Password Changed", // Mail subject
+                        html: `your new password is ${newPassword}` // HTML body
+                  }
+
+                  transporter.sendMail(mailOptions, function(err2, info) {
+                        if (err) return res.sendStatus(400)
+                        else {
+                              result.password = newPassword
+                              result.save(function(err3, result3) {
+                                    if (result3) {
+                                          console.log(result3)
+                                    } else {
+                                          console.log(err3)
+                                    }
+                              })
+                              return res.send("email sent")
+                        }
+                  })
+            } else {
+                  res.sendStatus(400)
             }
       })
 })

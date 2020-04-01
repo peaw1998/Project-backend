@@ -1,6 +1,10 @@
 const router = require("express").Router()
 const TeacherUser = require("../model/TeacherUser")
 const bcrypt = require("bcrypt")
+const jwt = require("jwt-simple")
+const nodemailer = require("nodemailer")
+const mail = require("../config/gmail")
+const crypto = require("crypto")
 
 //Teacher
 router.get("/api/teachers", (req, res) => {
@@ -19,11 +23,11 @@ router.get("/api/teacher/:id", (req, res) => {
       })
 })
 
-router.get("/auth/teacher/login", (req, res) => {
+router.post("/auth/teacher/login", (req, res) => {
       TeacherUser.findOne({ username: req.body.username }, function(err, user) {
             if (user) {
                   bcrypt.compare(req.body.password, user.password, function(
-                        err,
+                        err2,
                         res1
                   ) {
                         if (res1) {
@@ -67,6 +71,42 @@ router.post("/auth/teacher/signup", (req, res) => {
                   })
             } else {
                   res.status(400).send("duplicate username or password")
+            }
+      })
+})
+
+router.post("/auth/teacher/forgetpassword", (req, res) => {
+      TeacherUser.findOne({ email: req.body.email }, function(err, result) {
+            if (result) {
+                  let newPassword = crypto.randomBytes(8).toString("hex")
+                  const transporter = nodemailer.createTransport({
+                        service: "gmail",
+                        auth: mail
+                  })
+
+                  let mailOptions = {
+                        from: mail.user, // sender
+                        to: req.body.email, // list of receivers
+                        subject: "Password Changed", // Mail subject
+                        html: `your new password is ${newPassword}` // HTML body
+                  }
+
+                  transporter.sendMail(mailOptions, function(err2, info) {
+                        if (err) return res.sendStatus(400)
+                        else {
+                              result.password = newPassword
+                              result.save(function(err3, result3) {
+                                    if (result3) {
+                                          console.log(result3)
+                                    } else {
+                                          console.log(err3)
+                                    }
+                              })
+                              return res.send("email sent")
+                        }
+                  })
+            } else {
+                  res.sendStatus(400)
             }
       })
 })
