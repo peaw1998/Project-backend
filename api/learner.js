@@ -5,16 +5,17 @@ const jwt = require("jwt-simple")
 const nodemailer = require("nodemailer")
 const mail = require("../config/gmail")
 const crypto = require("crypto")
+const requireJWTAuth = require("../config/jwt")
 
 //Learner
 router.get("/api/learners", (req, res) => {
-      LearnerUser.find({}, function(err, users) {
+      LearnerUser.find({}, function (err, users) {
             res.send({ users: users })
       })
 })
 
 router.get("/api/learner/:id", (req, res) => {
-      LearnerUser.findOne({ _id: req.params.id }, function(err, user) {
+      LearnerUser.findOne({ _id: req.params.id }, function (err, user) {
             if (user) {
                   res.send(user)
             } else {
@@ -24,9 +25,12 @@ router.get("/api/learner/:id", (req, res) => {
 })
 
 router.post("/auth/learner/login", (req, res) => {
-      LearnerUser.findOne({ username: req.body.username }, function(err, user) {
+      LearnerUser.findOne({ username: req.body.username }, function (
+            err,
+            user
+      ) {
             if (user) {
-                  bcrypt.compare(req.body.password, user.password, function(
+                  bcrypt.compare(req.body.password, user.password, function (
                         err,
                         res1
                   ) {
@@ -48,10 +52,10 @@ router.post("/auth/learner/login", (req, res) => {
 })
 
 router.post("/auth/learner/signup", (req, res) => {
-      LearnerUser.find({}, function(err, result) {
+      LearnerUser.find({}, function (err, result) {
             if (
                   result.filter(
-                        learner =>
+                        (learner) =>
                               learner.username === req.body.username ||
                               learner.email === req.body.email
                   ).length === 0
@@ -60,9 +64,9 @@ router.post("/auth/learner/signup", (req, res) => {
                         username: req.body.username,
                         password: req.body.password,
                         email: req.body.email,
-                        subjectID: []
+                        subjectID: [],
                   })
-                  instance.save(function(err2, result2) {
+                  instance.save(function (err2, result2) {
                         if (err2 || !result2) {
                               res.sendStatus(400)
                         } else {
@@ -76,26 +80,26 @@ router.post("/auth/learner/signup", (req, res) => {
 })
 
 router.post("/auth/learner/forgetpassword", (req, res) => {
-      LearnerUser.findOne({ email: req.body.email }, function(err, result) {
+      LearnerUser.findOne({ email: req.body.email }, function (err, result) {
             if (result) {
                   let newPassword = crypto.randomBytes(8).toString("hex")
                   const transporter = nodemailer.createTransport({
                         service: "gmail",
-                        auth: mail
+                        auth: mail,
                   })
 
                   let mailOptions = {
                         from: mail.user, // sender
                         to: req.body.email, // list of receivers
                         subject: "Password Changed", // Mail subject
-                        html: `your new password is ${newPassword}` // HTML body
+                        html: `your new password is ${newPassword}`, // HTML body
                   }
 
-                  transporter.sendMail(mailOptions, function(err2, info) {
+                  transporter.sendMail(mailOptions, function (err2, info) {
                         if (err) return res.sendStatus(400)
                         else {
                               result.password = newPassword
-                              result.save(function(err3, result3) {
+                              result.save(function (err3, result3) {
                                     if (result3) {
                                           console.log(result3)
                                     } else {
@@ -109,6 +113,36 @@ router.post("/auth/learner/forgetpassword", (req, res) => {
                   res.sendStatus(400)
             }
       })
+})
+
+router.put("/auth/learner/changepassword", requireJWTAuth, (req, res) => {
+      LearnerUser.findOne(
+            {
+                  username: jwt.decode(
+                        req.headers.authorization.split(" ")[1],
+                        "MY_SECRET_KEY"
+                  ),
+            },
+            function (err, result) {
+                  if (err || !result) {
+                        return res.sendStatus(400)
+                  } else {
+                        if (req.body.password) {
+                              result.password = req.body.password
+                              result.save(function (err3, result3) {
+                                    if (result3) {
+                                          console.log(result3)
+                                    } else {
+                                          console.log(err3)
+                                    }
+                              })
+                              return res.send("password changed")
+                        } else {
+                              return res.sendStatus(400)
+                        }
+                  }
+            }
+      )
 })
 
 module.exports = router

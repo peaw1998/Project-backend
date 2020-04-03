@@ -5,11 +5,11 @@ const app = express()
 
 const _ = require("lodash")
 
-const p24 = n => _.padStart(n, 24, "0")
+const requireJWTAuth = require("./config/jwt")
+
+const p24 = (n) => _.padStart(n, 24, "0")
 
 app.use(bodyParser.json())
-const jwt = require("jwt-simple")
-const passport = require("passport")
 
 mongoose.connect(
       "mongodb+srv://maapeaw:maapeaw5500@cluster0-ix8xq.mongodb.net/test?retryWrites=true&w=majority"
@@ -29,24 +29,9 @@ app.get("/", (req, res) => {
 app.use(require("./api/learner"))
 app.use(require("./api/teacher"))
 
-//ใช้ในการ decode jwt ออกมา
-const ExtractJwt = require("passport-jwt").ExtractJwt
-//ใช้ในการประกาศ Strategy
-const JwtStrategy = require("passport-jwt").Strategy
-const SECRET = "MY_SECRET_KEY"
-//สร้าง Strategy
-const jwtOptions = {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: SECRET
-}
-const jwtAuth = new JwtStrategy(jwtOptions, (payload, done) => {
-      done(null, true)
-})
-//เสียบ Strategy เข้า Passport
-passport.use(jwtAuth)
-//ทำ Passport Middleware
-const requireJWTAuth = passport.authenticate("jwt", { session: false })
-app.use("/", requireJWTAuth)
+app.use("/api", requireJWTAuth)
+//url ที่ขึ้นต้นด้วย /api จะต้องใช้ token
+
 app.use(require("./api/subject"))
 app.use(require("./api/chapter"))
 app.use(require("./api/exercise"))
