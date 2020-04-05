@@ -82,7 +82,7 @@ router.post("/auth/learner/signup", (req, res) => {
 router.post("/auth/learner/forgetpassword", (req, res) => {
       LearnerUser.findOne({ email: req.body.email }, function (err, result) {
             if (result) {
-                  let newPassword = crypto.randomBytes(8).toString("hex")
+                  let newPassword = crypto.randomBytes(4).toString("hex")
                   const transporter = nodemailer.createTransport({
                         service: "gmail",
                         auth: mail,
