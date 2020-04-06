@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer");
 const mail = require("../config/gmail");
 const crypto = require("crypto");
 const requireJWTAuth = require("../config/jwt");
+const _ = require("lodash");
 
 //Learner
 router.get("/api/learners", (req, res) => {
@@ -71,7 +72,7 @@ router.post("/auth/learner/signup", (req, res) => {
 router.post("/auth/learner/forgetpassword", (req, res) => {
   LearnerUser.findOne({ email: req.body.email }, function (err, result) {
     if (result) {
-      let newPassword = crypto.randomBytes(8).toString("hex");
+      let newPassword = crypto.randomBytes(4).toString("hex");
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: mail,
@@ -129,6 +130,24 @@ router.put("/auth/learner/changepassword", requireJWTAuth, (req, res) => {
         } else {
           return res.sendStatus(400);
         }
+      }
+    }
+  );
+});
+
+router.get("/auth/learner/profile", requireJWTAuth, (req, res) => {
+  LearnerUser.findOne(
+    {
+      username: jwt.decode(
+        req.headers.authorization.split(" ")[1],
+        "MY_SECRET_KEY"
+      ),
+    },
+    function (err, result) {
+      if (err || !result) {
+        return res.sendStatus(400);
+      } else {
+        res.send(result);
       }
     }
   );

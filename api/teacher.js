@@ -71,7 +71,7 @@ router.post("/auth/teacher/signup", (req, res) => {
 router.post("/auth/teacher/forgetpassword", (req, res) => {
   TeacherUser.findOne({ email: req.body.email }, function (err, result) {
     if (result) {
-      let newPassword = crypto.randomBytes(8).toString("hex");
+      let newPassword = crypto.randomBytes(4).toString("hex");
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: mail,
@@ -129,6 +129,24 @@ router.put("/auth/teacher/changepassword", requireJWTAuth, (req, res) => {
         } else {
           return res.sendStatus(400);
         }
+      }
+    }
+  );
+});
+
+router.get("/auth/teacher/profile", requireJWTAuth, (req, res) => {
+  TeacherUser.findOne(
+    {
+      username: jwt.decode(
+        req.headers.authorization.split(" ")[1],
+        "MY_SECRET_KEY"
+      ),
+    },
+    function (err, result) {
+      if (err || !result) {
+        return res.sendStatus(400);
+      } else {
+        res.send(result);
       }
     }
   );
