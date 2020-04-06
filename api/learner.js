@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer")
 const mail = require("../config/gmail")
 const crypto = require("crypto")
 const requireJWTAuth = require("../config/jwt")
+const _ = require("lodash")
 
 //Learner
 router.get("/api/learners", (req, res) => {
@@ -140,6 +141,24 @@ router.put("/auth/learner/changepassword", requireJWTAuth, (req, res) => {
                         } else {
                               return res.sendStatus(400)
                         }
+                  }
+            }
+      )
+})
+
+router.get("/auth/learner/profile", requireJWTAuth, (req, res) => {
+      LearnerUser.findOne(
+            {
+                  username: jwt.decode(
+                        req.headers.authorization.split(" ")[1],
+                        "MY_SECRET_KEY"
+                  ),
+            },
+            function (err, result) {
+                  if (err || !result) {
+                        return res.sendStatus(400)
+                  } else {
+                        res.send(result)
                   }
             }
       )

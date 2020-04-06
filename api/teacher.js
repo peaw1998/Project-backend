@@ -145,4 +145,22 @@ router.put("/auth/teacher/changepassword", requireJWTAuth, (req, res) => {
       )
 })
 
+router.get("/auth/teacher/profile", requireJWTAuth, (req, res) => {
+      TeacherUser.findOne(
+            {
+                  username: jwt.decode(
+                        req.headers.authorization.split(" ")[1],
+                        "MY_SECRET_KEY"
+                  ),
+            },
+            function (err, result) {
+                  if (err || !result) {
+                        return res.sendStatus(400)
+                  } else {
+                        res.send(result)
+                  }
+            }
+      )
+})
+
 module.exports = router
