@@ -1,6 +1,6 @@
 const mail = {
-      user: "pimwipa.tho@gmail.com",
-      pass: "ballysmoothie"
-}
+  user: "courseonline.newpass@gmail.com",
+  pass: "maapeaw5500",
+};
 
-module.exports = mail
+module.exports = mail;
