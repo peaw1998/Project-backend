@@ -37,7 +37,10 @@ router.post("/auth/teacher/login", (req, res) => {
                         if (res1) {
                               res.send(
                                     jwt.encode(
-                                          req.body.username,
+                                          {
+                                                username: req.body.username,
+                                                role: "teacher",
+                                          },
                                           "MY_SECRET_KEY"
                                     )
                               )
@@ -121,7 +124,7 @@ router.put("/auth/teacher/changepassword", requireJWTAuth, (req, res) => {
                   username: jwt.decode(
                         req.headers.authorization.split(" ")[1],
                         "MY_SECRET_KEY"
-                  ),
+                  ).username,
             },
             function (err, result) {
                   if (err || !result) {
@@ -151,7 +154,7 @@ router.get("/auth/teacher/profile", requireJWTAuth, (req, res) => {
                   username: jwt.decode(
                         req.headers.authorization.split(" ")[1],
                         "MY_SECRET_KEY"
-                  ),
+                  ).username,
             },
             function (err, result) {
                   if (err || !result) {

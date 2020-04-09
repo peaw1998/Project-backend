@@ -38,7 +38,10 @@ router.post("/auth/learner/login", (req, res) => {
                         if (res1) {
                               res.send(
                                     jwt.encode(
-                                          req.body.username,
+                                          {
+                                                username: req.body.username,
+                                                role: "learner",
+                                          },
                                           "MY_SECRET_KEY"
                                     )
                               )
@@ -122,7 +125,7 @@ router.put("/auth/learner/changepassword", requireJWTAuth, (req, res) => {
                   username: jwt.decode(
                         req.headers.authorization.split(" ")[1],
                         "MY_SECRET_KEY"
-                  ),
+                  ).username,
             },
             function (err, result) {
                   if (err || !result) {
@@ -152,7 +155,7 @@ router.get("/auth/learner/profile", requireJWTAuth, (req, res) => {
                   username: jwt.decode(
                         req.headers.authorization.split(" ")[1],
                         "MY_SECRET_KEY"
-                  ),
+                  ).username,
             },
             function (err, result) {
                   if (err || !result) {
