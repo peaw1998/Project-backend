@@ -95,7 +95,7 @@ router.post("/auth/teacher/forgetpassword", (req, res) => {
                         from: mail.user, // sender
                         to: req.body.email, // list of receivers
                         subject: "Password Changed", // Mail subject
-                        html: your new password is ${newPassword}, // HTML body
+                        html: `your new password is ${newPassword}`, // HTML body
                   }
 
                   transporter.sendMail(mailOptions, function (err2, info) {
