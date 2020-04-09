@@ -96,7 +96,7 @@ router.post("/auth/learner/forgetpassword", (req, res) => {
                         from: mail.user, // sender
                         to: req.body.email, // list of receivers
                         subject: "Password Changed", // Mail subject
-                        html: "your new password is" + newPassword, // HTML body
+                        html: `your new password is ${newPassword}`, // HTML body
                   }
 
                   transporter.sendMail(mailOptions, function (err2, info) {
@@ -166,8 +166,6 @@ router.get("/auth/learner/profile", requireJWTAuth, (req, res) => {
             }
       )
 })
+// test
 
 module.exports = router
-
-//
-//
