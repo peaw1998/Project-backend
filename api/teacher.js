@@ -25,6 +25,7 @@ router.get("/api/teacher/:id", (req, res) => {
 });
 
 router.post("/auth/teacher/login", (req, res) => {
+<<<<<<< HEAD
   TeacherUser.findOne({ username: req.body.username }, function (err, user) {
     if (user) {
       bcrypt.compare(req.body.password, user.password, function (err2, res1) {
@@ -39,6 +40,36 @@ router.post("/auth/teacher/login", (req, res) => {
     }
   });
 });
+=======
+      TeacherUser.findOne({ username: req.body.username }, function (
+            err,
+            user
+      ) {
+            if (user) {
+                  bcrypt.compare(req.body.password, user.password, function (
+                        err2,
+                        res1
+                  ) {
+                        if (res1) {
+                              res.send(
+                                    jwt.encode(
+                                          {
+                                                username: req.body.username,
+                                                role: "teacher",
+                                          },
+                                          "MY_SECRET_KEY"
+                                    )
+                              )
+                        } else {
+                              res.sendStatus(401)
+                        }
+                  })
+            } else {
+                  res.sendStatus(401)
+            }
+      })
+})
+>>>>>>> d452f27812970ca63466b51fc729c604cfe71d21
 
 router.post("/auth/teacher/signup", (req, res) => {
   TeacherUser.find({}, function (err, result) {
@@ -105,6 +136,7 @@ router.post("/auth/teacher/forgetpassword", (req, res) => {
 });
 
 router.put("/auth/teacher/changepassword", requireJWTAuth, (req, res) => {
+<<<<<<< HEAD
   TeacherUser.findOne(
     {
       username: jwt.decode(
@@ -123,6 +155,33 @@ router.put("/auth/teacher/changepassword", requireJWTAuth, (req, res) => {
               console.log(result3);
             } else {
               console.log(err3);
+=======
+      TeacherUser.findOne(
+            {
+                  username: jwt.decode(
+                        req.headers.authorization.split(" ")[1],
+                        "MY_SECRET_KEY"
+                  ).username,
+            },
+            function (err, result) {
+                  if (err || !result) {
+                        return res.sendStatus(400)
+                  } else {
+                        if (req.body.password) {
+                              result.password = req.body.password
+                              result.save(function (err3, result3) {
+                                    if (result3) {
+                                          console.log(result3)
+                                    } else {
+                                          console.log(err3)
+                                    }
+                              })
+                              return res.send("password changed")
+                        } else {
+                              return res.sendStatus(400)
+                        }
+                  }
+>>>>>>> d452f27812970ca63466b51fc729c604cfe71d21
             }
           });
           return res.send("password changed");
@@ -135,6 +194,7 @@ router.put("/auth/teacher/changepassword", requireJWTAuth, (req, res) => {
 });
 
 router.get("/auth/teacher/profile", requireJWTAuth, (req, res) => {
+<<<<<<< HEAD
   TeacherUser.findOne(
     {
       username: jwt.decode(
@@ -151,5 +211,23 @@ router.get("/auth/teacher/profile", requireJWTAuth, (req, res) => {
     }
   );
 });
+=======
+      TeacherUser.findOne(
+            {
+                  username: jwt.decode(
+                        req.headers.authorization.split(" ")[1],
+                        "MY_SECRET_KEY"
+                  ).username,
+            },
+            function (err, result) {
+                  if (err || !result) {
+                        return res.sendStatus(400)
+                  } else {
+                        res.send(result)
+                  }
+            }
+      )
+})
+>>>>>>> d452f27812970ca63466b51fc729c604cfe71d21
 
 module.exports = router;
