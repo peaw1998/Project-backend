@@ -1,16 +1,18 @@
 const router = require("express").Router();
 const Exercise = require("../model/Exercise");
 const Subject = require("../model/Subject");
+const Score = require("../model/Score");
+const jwt = require("jwt-simple");
 
 //Exercise
 router.get("/api/exercises", (req, res) => {
-  Exercise.find({}, function(err, users) {
+  Exercise.find({}, function (err, users) {
     res.send({ users: users });
   });
 });
 
 router.get("/api/exercise/:id", (req, res) => {
-  Exercise.findOne({ _id: req.params.id }, function(err, user) {
+  Exercise.findOne({ _id: req.params.id }, function (err, user) {
     if (user) {
       res.send(user);
     } else {
@@ -19,10 +21,44 @@ router.get("/api/exercise/:id", (req, res) => {
   });
 });
 
+router.get("/exercise/score/:id", (req, res) => {
+  Exercise.findOne({ _id: req.params.id })
+    .populate("scoreID")
+    .exec(function (err, exercise) {
+      if (exercise) {
+        return res.send(exercise.scoreID.AllScore);
+      } else res.status(400).send("not found exercise");
+    });
+});
+
+router.post("/exercise/score/:id", (req, res) => {
+  Exercise.findOne({ _id: req.params.id }).exec(function (err, result) {
+    Score.findOne({ _id: result.scoreID }).exec(function (err2, result2) {
+      result2.AllScore = [
+        ...result2.AllScore,
+        {
+          username: jwt.decode(
+            req.headers.authorization.split(" ")[1],
+            "MY_SECRET_KEY"
+          ).username,
+          score: req.body.score,
+        },
+      ];
+      result2.save(function (err3, result3) {
+        if (err3 || !result3) {
+          return res.status(400).send(err3);
+        } else {
+          return res.send("Ok");
+        }
+      });
+    });
+  });
+});
+
 router.get("/api/exercises/subject/:id", (req, res) => {
   Subject.findOne({ _id: req.params.id })
     .populate("exerciseID")
-    .exec(function(err, exercises) {
+    .exec(function (err, exercises) {
       if (err || !exercises) {
         res.send([]);
       } else {
@@ -36,9 +72,9 @@ router.post("/api/exercise", (req, res) => {
     type: req.body.type,
     preTest: req.body.preTest,
     postTest: req.body.postTest,
-    Question: req.body.Question
+    Question: req.body.Question,
   });
-  instance.save(function(err, result) {
+  instance.save(function (err, result) {
     if (err || !result) {
       res.status(400).send(err);
     } else {
@@ -48,7 +84,7 @@ router.post("/api/exercise", (req, res) => {
         { _id: req.body.subjectId },
         { $push: { exerciseID: id } },
 
-        function(err1, result1) {
+        function (err1, result1) {
           if (result1) {
             res.send("Create Success");
           } else {
@@ -64,7 +100,7 @@ router.put("/api/exercise/:id", (req, res) => {
   Exercise.findByIdAndUpdate(
     { _id: req.params.id },
     { Question: req.body.Question },
-    function(err, result) {
+    function (err, result) {
       if (err) {
         res.sendStatus(400).send("update error");
       } else {
@@ -75,13 +111,19 @@ router.put("/api/exercise/:id", (req, res) => {
   );
 });
 
+// router.get("/exercise/score/:id",(req,res)=>{
+//   Exercise.findOne({ _id: req.params.id }, function(err, result) {
+// return res.send(result)
+
+// });
+
 router.delete("/api/exercise/:id", (req, res) => {
-  Exercise.findOneAndDelete({ _id: req.params.id }, function(err, result) {
+  Exercise.findOneAndDelete({ _id: req.params.id }, function (err, result) {
     if (result) {
       Subject.findOneAndUpdate(
         { exerciseID: result._id },
         { $pull: { exerciseID: result._id } },
-        function(err1, result1) {
+        function (err1, result1) {
           if (result1) {
             res.send("Delete Success");
           } else {
