@@ -26,33 +26,65 @@ router.get("/exercise/score/:id", (req, res) => {
     .populate("scoreID")
     .exec(function (err, exercise) {
       if (exercise) {
-        return res.send(exercise.scoreID.AllScore);
+        return res.send(exercise.scoreID);
       } else res.status(400).send("not found exercise");
     });
 });
 
+// router.post("/exercise/score/:id", (req, res) => {
+//   Exercise.findOne({ _id: req.params.id }).exec(function (err, result) {
+//     Score.findOne({ _id: result.scoreID }).exec(function (err2, result2) {
+//       result2.AllScore = [
+//         ...result2.AllScore,
+//         {
+//           username: jwt.decode(
+//             req.headers.authorization.split(" ")[1],
+//             "MY_SECRET_KEY"
+//           ).username,
+//           score: req.body.score,
+//         },
+//       ];
+//       result2.save(function (err3, result3) {
+//         if (err3 || !result3) {
+//           return res.status(400).send(err3);
+//         } else {
+//           return res.send("OK");
+//         }
+//       });
+//     });
+//   });
+// });
 router.post("/exercise/score/:id", (req, res) => {
-  Exercise.findOne({ _id: req.params.id }).exec(function (err, result) {
-    Score.findOne({ _id: result.scoreID }).exec(function (err2, result2) {
-      result2.AllScore = [
-        ...result2.AllScore,
-        {
-          username: jwt.decode(
-            req.headers.authorization.split(" ")[1],
-            "MY_SECRET_KEY"
-          ).username,
-          score: req.body.score,
-        },
-      ];
-      result2.save(function (err3, result3) {
-        if (err3 || !result3) {
-          return res.status(400).send(err3);
-        } else {
-          return res.send("OK");
-        }
-      });
-    });
-  });
+  Score.create(
+    {
+      username: jwt.decode(
+        req.headers.authorization.split(" ")[1],
+        "MY_SECRET_KEY"
+      ).username,
+      score: req.body.score,
+    },
+    function (err, result) {
+      if (err || !result) {
+        return res.status(400).send("create score failed");
+      } else {
+        Exercise.findOne({ _id: req.params.id }).exec(function (err2, result2) {
+          if (err2 || !result2) {
+            return res.status(400).send("execise not found");
+          } else {
+            let newScoreID = [...result2.scoreID, result._id];
+            result2.scoreID = newScoreID;
+            result2.save(function (err3, result3) {
+              if (err3 || !result3) {
+                return res.status(400).send("execise edit failed");
+              } else {
+                return res.send("ok");
+              }
+            });
+          }
+        });
+      }
+    }
+  );
 });
 
 router.get("/api/exercises/subject/:id", (req, res) => {
