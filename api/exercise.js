@@ -48,7 +48,7 @@ router.post("/exercise/score/:id", (req, res) => {
         if (err3 || !result3) {
           return res.status(400).send(err3);
         } else {
-          return res.send(req.timestamp);
+          return res.send("OK");
         }
       });
     });
